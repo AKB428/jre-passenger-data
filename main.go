@@ -3,24 +3,20 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
+	"os"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
-func ExampleScrape() {
-	// Request the HTML page.
-	res, err := http.Get("https://www.jreast.co.jp/passenger/index.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer res.Body.Close()
-	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
-	}
+func scrape(path string) {
 
-	// Load the HTML document
-	doc, err := goquery.NewDocumentFromReader(res.Body)
+	f, err := os.Open(path)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	doc, err := goquery.NewDocumentFromReader(f)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,5 +30,9 @@ func ExampleScrape() {
 }
 
 func main() {
-	ExampleScrape()
+	for i := 2021; i >= 2000; i-- {
+		path := fmt.Sprintf("%s%d.html", "./htmls/", i)
+		fmt.Println(path)
+		scrape(path)
+	}
 }

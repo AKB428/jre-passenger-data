@@ -12,7 +12,7 @@ func main() {
 	base := "https://www.jreast.co.jp/passenger/"
 
 	var url string
-	for i := 2000; i <= 2005; i++ {
+	for i := 2000; i <= 2021; i++ {
 		if i == 2021 {
 			url = fmt.Sprintf("%s%s.html", base, "index")
 		} else {
