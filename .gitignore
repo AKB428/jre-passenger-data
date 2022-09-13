@@ -24,3 +24,4 @@ htmls/*.html
 jre-passenger-data
 tool/download
 .DS_Store
+test.csv
