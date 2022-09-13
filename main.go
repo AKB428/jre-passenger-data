@@ -14,7 +14,7 @@ import (
 )
 
 const endYear = 2021
-const startYear = 2010
+const startYear = 2000
 
 type record struct {
 	rank    string
@@ -52,6 +52,14 @@ func scrape(path string, year int) {
 		rank := s.Find("td:nth-child(1)").Text()
 		station := s.Find("td.stationName").Text()
 		count := s.Find("td:nth-child(5)").Text()
+
+		if year <= 2012 {
+			station = s.Find("td:nth-child(2)").Text()
+		}
+
+		if year <= 2011 {
+			count = s.Find("td:nth-child(3)").Text()
+		}
 
 		if year <= 2019 {
 			station, _ = sjis_to_utf8(station)
