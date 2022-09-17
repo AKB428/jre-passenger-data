@@ -17,14 +17,13 @@ const endYear = 2021
 const startYear = 2000
 
 type record struct {
-	rank    string
-	station string
-	count   string
+	rank  int
+	count int
 }
 
 var stationList []string
 
-var stationMap map[string]map[int]int
+var stationMap map[string]map[int]record
 
 func scrape(path string, year int) {
 
@@ -70,26 +69,27 @@ func scrape(path string, year int) {
 			//r := record{rank, station, count}
 			if year == endYear {
 				stationList = append(stationList, station)
-				stationMap[station] = map[int]int{}
+				stationMap[station] = make(map[int]record)
 			}
 
 			count = strings.Replace(count, ",", "", -1)
 			ci, _ := strconv.Atoi(count)
+			ranki, _ := strconv.Atoi(rank)
 			cs := stationMap[station]
 
-			if cs == nil {
-				cs = make(map[int]int)
+			// csがnilの時は最新の年度TOP100に存在しない駅名のためSKIP
+			if cs != nil {
+				cs[year] = record{count: ci, rank: ranki}
+				stationMap[station] = cs
 			}
 
-			cs[year] = ci
-			stationMap[station] = cs
 		}
 
 	})
 }
 
 func main() {
-	stationMap = make(map[string]map[int]int)
+	stationMap = make(map[string]map[int]record)
 
 	for i := endYear; i >= startYear; i-- {
 		path := fmt.Sprintf("%s%d.html", "./htmls/", i)
@@ -113,7 +113,7 @@ func genCSV() {
 			fmt.Printf(",")
 
 			cs := stationMap[v]
-			v := cs[i]
+			v := cs[i].count
 
 			fmt.Print(v)
 		}
