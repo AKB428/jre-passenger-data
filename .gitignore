@@ -24,5 +24,6 @@ htmls/*.html
 jre-passenger-data
 tool/download
 .DS_Store
-count.csv
-rank.csv
+bin/download
+bin/jre-passenger-data
+csv
