@@ -13,8 +13,8 @@ import (
 	"golang.org/x/text/transform"
 )
 
-const endYear = 2021
 const startYear = 2000
+const endYear = 2021
 
 type record struct {
 	rank  int
@@ -38,14 +38,6 @@ func scrape(path string, year int) {
 		log.Fatal(err)
 	}
 
-	/*
-		if year <= 2019 {
-			body := transform.NewReader(bufio.NewReader(f), japanese.ShiftJIS.NewDecoder())
-			doc, err = goquery.NewDocumentFromReader(body)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}*/
 	doc.Find("tbody > tr").Each(func(i int, s *goquery.Selection) {
 
 		rank := s.Find("td:nth-child(1)").Text()
@@ -61,26 +53,25 @@ func scrape(path string, year int) {
 		}
 
 		if year <= 2019 {
-			station, _ = sjis_to_utf8(station)
+			station, _ = sjis2utf8(station)
 		}
 
 		if rank != "" {
-			// fmt.Printf("%s %s %s\n", rank, station, count)
-			//r := record{rank, station, count}
 			if year == endYear {
 				stationList = append(stationList, station)
 				stationMap[station] = make(map[int]record)
 			}
 
+			// 10,000 -> 10000
 			count = strings.Replace(count, ",", "", -1)
 			ci, _ := strconv.Atoi(count)
 			ranki, _ := strconv.Atoi(rank)
-			cs := stationMap[station]
+			yearMapBySt := stationMap[station]
 
-			// csがnilの時は最新の年度TOP100に存在しない駅名のためSKIP
-			if cs != nil {
-				cs[year] = record{count: ci, rank: ranki}
-				stationMap[station] = cs
+			// yearMapByStがnilの時は最新の年度TOP100に存在しない駅名のためSKIP
+			if yearMapBySt != nil {
+				yearMapBySt[year] = record{count: ci, rank: ranki}
+				stationMap[station] = yearMapBySt
 			}
 
 		}
@@ -93,14 +84,13 @@ func main() {
 
 	for i := endYear; i >= startYear; i-- {
 		path := fmt.Sprintf("%s%d.html", "./htmls/", i)
-		//fmt.Println(path)
 		scrape(path, i)
 	}
-	genCSV()
+	genCSV(false)
 }
 
-func genCSV() {
-	// 1行目を出力する
+func genCSV(rank bool) {
+	// ヘッダ行目を出力する
 	for _, v := range stationList {
 		fmt.Printf(",")
 		fmt.Print(v)
@@ -109,22 +99,25 @@ func genCSV() {
 
 	for i := startYear; i <= endYear; i++ {
 		fmt.Print(i)
-		for _, v := range stationList {
+		for _, stationName := range stationList {
 			fmt.Printf(",")
 
-			cs := stationMap[v]
-			v := cs[i].count
+			cs := stationMap[stationName]
+
+			var v int
+			if rank {
+				v = cs[i].rank
+			} else {
+				v = cs[i].count
+			}
 
 			fmt.Print(v)
 		}
 		fmt.Println("")
 	}
-
-	//fmt.Printf("%v\n", stationMap)
-
 }
 
-func sjis_to_utf8(str string) (string, error) {
+func sjis2utf8(str string) (string, error) {
 	ret, err := ioutil.ReadAll(transform.NewReader(strings.NewReader(str), japanese.ShiftJIS.NewDecoder()))
 	if err != nil {
 		return "", err
