@@ -26,4 +26,5 @@ tool/download
 .DS_Store
 bin/download
 bin/jre-passenger-data
+bin/*.exe
 csv
