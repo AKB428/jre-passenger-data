@@ -23,7 +23,7 @@ GOOS=windows GOARCH=amd64 go build -trimpath -ldflags '-s -w' -o ./bin/jre-passe
 ```
 
 ```
-GOOS=windows GOARCH=amd64 go build -trimpath -ldflags '-s -w' -o ./bin/download.exe /download/download.go
+GOOS=windows GOARCH=amd64 go build -trimpath -ldflags '-s -w' -o ./bin/download.exe ./download/download.go
 ```
 
 
@@ -41,11 +41,11 @@ GOOS=windows GOARCH=amd64 go build -trimpath -ldflags '-s -w' -o ./bin/download.
 ### 乗車人員データTOP100の出力
 
 ```
-./bin/jre-passenger-data
+./bin/jre-passenger-data > csv/count.csv
 ```
 
 ### 乗車人員データTOP100(ランキング)の出力
 
 ```
-./bin/jre-passenger-data -r
+./bin/jre-passenger-data -r > csv/rank.csv
 ```
