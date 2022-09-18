@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -80,13 +81,18 @@ func scrape(path string, year int) {
 }
 
 func main() {
+
+	var rankCsvPrint bool
+	flag.BoolVar(&rankCsvPrint, "r", false, "rankCsvPrint")
+	flag.Parse()
+
 	stationMap = make(map[string]map[int]record)
 
 	for i := endYear; i >= startYear; i-- {
 		path := fmt.Sprintf("%s%d.html", "./htmls/", i)
 		scrape(path, i)
 	}
-	genCSV(false)
+	genCSV(rankCsvPrint)
 }
 
 func genCSV(rank bool) {
