@@ -1,11 +1,13 @@
 package main
 
 import (
+	"encoding/csv"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -16,6 +18,9 @@ import (
 
 const startYear = 2000
 const endYear = 2021
+const csvDir = "csv"
+const countCsvFn = "count.csv"
+const rankCsvFn = "rank.csv"
 
 type record struct {
 	rank  int
@@ -92,35 +97,56 @@ func main() {
 		path := fmt.Sprintf("%s%d.html", "./htmls/", i)
 		scrape(path, i)
 	}
+
 	genCSV(rankCsvPrint)
 }
 
 func genCSV(rank bool) {
-	// ヘッダ行目を出力する
-	for _, v := range stationList {
-		fmt.Printf(",")
-		fmt.Print(v)
+	var filePath string
+	records := [][]string{}
+
+	checkSaveDir(csvDir)
+	if rank {
+		filePath = filepath.Join(csvDir, rankCsvFn)
+	} else {
+		filePath = filepath.Join(csvDir, countCsvFn)
 	}
-	fmt.Println("")
+
+	// ヘッダ行処理
+	header := []string{}
+	header = append(header, "年度")
+	header = append(header, stationList...)
+	records = append(records, header)
 
 	for i := startYear; i <= endYear; i++ {
-		fmt.Print(i)
+		record := []string{}
+		record = append(record, strconv.Itoa(i))
 		for _, stationName := range stationList {
-			fmt.Printf(",")
-
 			cs := stationMap[stationName]
-
 			var v int
 			if rank {
 				v = cs[i].rank
 			} else {
 				v = cs[i].count
 			}
-
-			fmt.Print(v)
+			record = append(record, strconv.Itoa(v))
 		}
-		fmt.Println("")
+		records = append(records, record)
 	}
+
+	f, err := os.Create(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	w := csv.NewWriter(f)
+
+	for _, record := range records {
+		if err := w.Write(record); err != nil {
+			log.Fatal(err)
+		}
+	}
+	w.Flush()
 }
 
 func sjis2utf8(str string) (string, error) {
@@ -129,4 +155,16 @@ func sjis2utf8(str string) (string, error) {
 		return "", err
 	}
 	return string(ret), err
+}
+
+func checkSaveDir(dir string) {
+	_, err := os.Stat(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.Mkdir(dir, 0755)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
 }

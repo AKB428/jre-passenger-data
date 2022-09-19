@@ -27,4 +27,4 @@ tool/download
 bin/download
 bin/jre-passenger-data
 bin/*.exe
-csv/*.csv
+csv

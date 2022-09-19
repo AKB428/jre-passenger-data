@@ -55,7 +55,7 @@ func checkSaveDir(dir string) {
 		if os.IsNotExist(err) {
 			err = os.Mkdir(dir, 0755)
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 		}
 	}
