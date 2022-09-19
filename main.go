@@ -140,13 +140,16 @@ func genCSV(rank bool) {
 	}
 
 	w := csv.NewWriter(f)
-
-	for _, record := range records {
-		if err := w.Write(record); err != nil {
-			log.Fatal(err)
-		}
+	//https://pkg.go.dev/encoding/csv#Writer.Write
+	//w.write + w.Flush するとWindowsDefenderが誤検知するのでw.WriteAllを使う
+	err = w.WriteAll(records) // calls Flush internally
+	if err != nil {
+		log.Fatalln(err)
 	}
-	w.Flush()
+
+	if err := w.Error(); err != nil {
+		log.Fatalln("error writing csv:", err)
+	}
 }
 
 func sjis2utf8(str string) (string, error) {
